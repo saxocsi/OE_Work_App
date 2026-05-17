@@ -147,5 +147,45 @@ namespace OE_Work_App.ViewModels
 
             Message = "Ingredient deleted.";
         }
+
+        public void AddCocktail(Cocktail cocktail)
+        {
+            Cocktails.Add(cocktail);
+
+            CocktailService.Cocktails.Add(cocktail);
+
+            Message = "Cocktail added.";
+        }
+
+        public void EditCocktail(Cocktail oldCocktail, Cocktail newCocktail)
+        {
+            oldCocktail.Name = newCocktail.Name;
+
+            oldCocktail.Glass = newCocktail.Glass;
+
+            oldCocktail.Ingredients = newCocktail.Ingredients;
+
+            OnPropertyChanged(nameof(Cocktails));
+
+            Message = "Cocktail edited.";
+        }
+
+        public void DeleteSelectedCocktail()
+        {
+            if (SelectedCocktail == null)
+            {
+                Message = "No cocktail selected.";
+
+                return;
+            }
+
+            CocktailService.Cocktails.Remove(SelectedCocktail);
+
+            Cocktails.Remove(SelectedCocktail);
+
+            SelectedCocktail = null;
+
+            Message = "Cocktail deleted.";
+        }
     }
 }
