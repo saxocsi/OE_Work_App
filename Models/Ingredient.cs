@@ -8,7 +8,7 @@ namespace OE_Work_App.Models
 {
     public class Ingredient
     {
-        private static int id = 1;
+        private static int nextId = 1;
 
         public int Id { get; private set; }
 
@@ -20,12 +20,9 @@ namespace OE_Work_App.Models
 
         public Ingredient(string name, double cl, int price)
         {
-            Id = id++;
-
+            Id = nextId++;
             Name = name;
-
             Cl = cl;
-
             Price = price;
         }
     }

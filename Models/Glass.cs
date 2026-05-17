@@ -15,7 +15,6 @@ namespace OE_Work_App.Models
         public Glass(string name, double capacityCl)
         {
             Name = name;
-
             CapacityCl = capacityCl;
         }
     }

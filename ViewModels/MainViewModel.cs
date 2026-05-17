@@ -12,62 +12,48 @@ namespace OE_Work_App.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private ObservableCollection<Ingredient> ingredients;
+        private ObservableCollection<Cocktail> cocktails;
+        private string message = string.Empty;
+
         public IIngredientService IngredientService { get; set; }
 
         public ICocktailService CocktailService { get; set; }
 
         public GlassService GlassService { get; set; }
 
-        public ObservableCollection<Ingredient> Ingredients { get; set; }
+        public ObservableCollection<Ingredient> Ingredients
+        {
+            get { return ingredients; }
+            set
+            {
+                ingredients = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public ObservableCollection<Cocktail> Cocktails { get; set; }
+        public ObservableCollection<Cocktail> Cocktails
+        {
+            get { return cocktails; }
+            set
+            {
+                cocktails = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<Glass> Glasses { get; set; }
 
-        private Ingredient? _selectedIngredient;
+        public Ingredient? SelectedIngredient { get; set; }
 
-        public Ingredient? SelectedIngredient
-        {
-            get
-            {
-                return _selectedIngredient;
-            }
-            set
-            {
-                _selectedIngredient = value;
-
-                OnPropertyChanged();
-            }
-        }
-
-        private Cocktail? _selectedCocktail;
-
-        public Cocktail? SelectedCocktail
-        {
-            get
-            {
-                return _selectedCocktail;
-            }
-            set
-            {
-                _selectedCocktail = value;
-
-                OnPropertyChanged();
-            }
-        }
-
-        private string _message = string.Empty;
+        public Cocktail? SelectedCocktail { get; set; }
 
         public string Message
         {
-            get
-            {
-                return _message;
-            }
+            get { return message; }
             set
             {
-                _message = value;
-
+                message = value;
                 OnPropertyChanged();
             }
         }
@@ -75,31 +61,20 @@ namespace OE_Work_App.ViewModels
         public MainViewModel()
         {
             IngredientService = new IngredientService();
-
             CocktailService = new CocktailService();
-
             GlassService = new GlassService();
 
-            Ingredients = new ObservableCollection<Ingredient>(
-                IngredientService.Ingredients
-            );
-
-            Cocktails = new ObservableCollection<Cocktail>(
-                CocktailService.Cocktails
-            );
-
-            Glasses = new ObservableCollection<Glass>(
-                GlassService.Glass
-            );
+            ingredients = new ObservableCollection<Ingredient>(IngredientService.Ingredients);
+            cocktails = new ObservableCollection<Cocktail>(CocktailService.Cocktails);
+            Glasses = new ObservableCollection<Glass>(GlassService.Glasses);
         }
 
         public void AddIngredient(string name, double cl, int price)
         {
             Ingredient ingredient = new(name, cl, price);
 
-            Ingredients.Add(ingredient);
-
             IngredientService.Ingredients.Add(ingredient);
+            Ingredients.Add(ingredient);
 
             Message = "Ingredient added.";
         }
@@ -107,12 +82,10 @@ namespace OE_Work_App.ViewModels
         public void EditIngredient(Ingredient ingredient, string name, double cl, int price)
         {
             ingredient.Name = name;
-
             ingredient.Cl = cl;
-
             ingredient.Price = price;
 
-            OnPropertyChanged(nameof(Ingredients));
+            Ingredients = new ObservableCollection<Ingredient>(IngredientService.Ingredients);
 
             Message = "Ingredient edited.";
         }
@@ -122,7 +95,6 @@ namespace OE_Work_App.ViewModels
             if (SelectedIngredient == null)
             {
                 Message = "No ingredient selected.";
-
                 return;
             }
 
@@ -134,13 +106,11 @@ namespace OE_Work_App.ViewModels
 
             if (isUsed)
             {
-                Message = "This ingredient is used in a cocktail, so it cannot be deleted.";
-
+                Message = "This ingredient is used in a cocktail.";
                 return;
             }
 
             IngredientService.Ingredients.Remove(SelectedIngredient);
-
             Ingredients.Remove(SelectedIngredient);
 
             SelectedIngredient = null;
@@ -150,9 +120,8 @@ namespace OE_Work_App.ViewModels
 
         public void AddCocktail(Cocktail cocktail)
         {
-            Cocktails.Add(cocktail);
-
             CocktailService.Cocktails.Add(cocktail);
+            Cocktails.Add(cocktail);
 
             Message = "Cocktail added.";
         }
@@ -160,12 +129,10 @@ namespace OE_Work_App.ViewModels
         public void EditCocktail(Cocktail oldCocktail, Cocktail newCocktail)
         {
             oldCocktail.Name = newCocktail.Name;
-
             oldCocktail.Glass = newCocktail.Glass;
-
             oldCocktail.Ingredients = newCocktail.Ingredients;
 
-            OnPropertyChanged(nameof(Cocktails));
+            Cocktails = new ObservableCollection<Cocktail>(CocktailService.Cocktails);
 
             Message = "Cocktail edited.";
         }
@@ -175,12 +142,10 @@ namespace OE_Work_App.ViewModels
             if (SelectedCocktail == null)
             {
                 Message = "No cocktail selected.";
-
                 return;
             }
 
             CocktailService.Cocktails.Remove(SelectedCocktail);
-
             Cocktails.Remove(SelectedCocktail);
 
             SelectedCocktail = null;

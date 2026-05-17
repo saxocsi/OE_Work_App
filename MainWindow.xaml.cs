@@ -86,18 +86,17 @@ namespace OE_Work_App
 
             if (window.ShowDialog() == true)
             {
-                if (window.CocktailEditorViewModel.SelectedGlass == null)
+                if (window.SelectedGlass == null)
                 {
                     return;
                 }
 
                 Cocktail cocktail = new(
-                    window.CocktailEditorViewModel.CocktailName,
-                    window.CocktailEditorViewModel.SelectedGlass
+                    window.CocktailName,
+                    window.SelectedGlass
                 );
 
                 cocktail.Ingredients = window
-                    .CocktailEditorViewModel
                     .CocktailIngredients
                     .ToList();
 
@@ -124,18 +123,17 @@ namespace OE_Work_App
 
             if (window.ShowDialog() == true)
             {
-                if (window.CocktailEditorViewModel.SelectedGlass == null)
+                if (window.SelectedGlass == null)
                 {
                     return;
                 }
 
                 Cocktail cocktail = new(
-                    window.CocktailEditorViewModel.CocktailName,
-                    window.CocktailEditorViewModel.SelectedGlass
+                    window.CocktailName,
+                    window.SelectedGlass
                 );
 
                 cocktail.Ingredients = window
-                    .CocktailEditorViewModel
                     .CocktailIngredients
                     .ToList();
 

@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace OE_Work_App.Models
 {
     public class Cocktail
     {
-        private static int id = 1;
+        private static int nextId = 1;
 
         public int Id { get; private set; }
 
@@ -46,12 +49,9 @@ namespace OE_Work_App.Models
 
         public Cocktail(string name, Glass glass)
         {
-            Id = id++;
-
+            Id = nextId++;
             Name = name;
-
             Glass = glass;
-
             Ingredients = new List<CocktailIngredient>();
         }
     }

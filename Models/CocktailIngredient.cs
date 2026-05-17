@@ -31,7 +31,6 @@ namespace OE_Work_App.Models
         public CocktailIngredient(Ingredient ingredient, int amount)
         {
             Ingredient = ingredient;
-
             Amount = amount;
         }
     }
