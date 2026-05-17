@@ -5,8 +5,81 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OE_Work_App"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Cocktail Stock Manager" Height="450" Width="800">
+    <Grid Margin="10">
+
+        <TabControl>
+
+            <TabItem Header="Ingredients">
+
+                <Grid Margin="10">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0 0 0 10">
+
+                        <TextBox Width="180"
+                                 Margin="0 0 10 0"
+                                 Text="{Binding NewIngredientName}"/>
+
+                        <TextBox Width="100"
+                                 Margin="0 0 10 0"
+                                 Text="{Binding NewIngredientCl}"/>
+
+                        <TextBox Width="100"
+                                 Margin="0 0 10 0"
+                                 Text="{Binding NewIngredientPrice}"/>
+
+                        <Button Content="Add Ingredient"
+                                Width="140"
+                                Click="AddIngredientBtn_Click"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Ingredients}"
+                              AutoGenerateColumns="False">
+
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn Header="Id"
+                                                Binding="{Binding Id}"/>
+
+                            <DataGridTextColumn Header="Name"
+                                                Binding="{Binding Name}"/>
+
+                            <DataGridTextColumn Header="CL"
+                                                Binding="{Binding Cl}"/>
+
+                            <DataGridTextColumn Header="Price"
+                                                Binding="{Binding Price}"/>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Header="Cocktails">
+
+                <Grid>
+
+                    <TextBlock Text="Cocktails page coming soon..."
+                               FontSize="24"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                </Grid>
+
+            </TabItem>
+
+        </TabControl>
 
     </Grid>
+
 </Window>
