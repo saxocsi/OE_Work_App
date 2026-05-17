@@ -32,5 +32,11 @@ namespace OE_Work_App
         {
             MainViewModel.AddIngredient();
         }
+
+        private void AddIngredientToCocktailBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel.AddIngredientToCocktail();
+        }
     }
+
 }
