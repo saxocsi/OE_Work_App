@@ -5,185 +5,70 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OE_Work_App"
         mc:Ignorable="d"
-        Title="Cocktail Stock Manager" Height="450" Width="800">
+        Title="Cocktail Stock Manager" Height="600" Width="1000">
     <Grid Margin="10">
-
         <TabControl>
-
             <TabItem Header="Ingredients">
-
                 <Grid Margin="10">
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 0 0 10">
-
-                        <TextBox Width="180"
-                                 Margin="0 0 10 0"
-                                 Text="{Binding NewIngredientName}"/>
-
-                        <TextBox Width="100"
-                                 Margin="0 0 10 0"
-                                 Text="{Binding NewIngredientCl}"/>
-
-                        <TextBox Width="100"
-                                 Margin="0 0 10 0"
-                                 Text="{Binding NewIngredientPrice}"/>
-
-                        <Button Content="Add Ingredient"
-                                Width="140"
+                        <Button Content="Add"
+                                Width="100"
+                                Margin="0 0 10 0"
                                 Click="AddIngredientBtn_Click"/>
+
+                        <Button Content="Edit"
+                                Width="100"
+                                Margin="0 0 10 0"
+                                Click="EditIngredientBtn_Click"/>
+
+                        <Button Content="Delete"
+                                Width="100"
+                                Click="DeleteIngredientBtn_Click"/>
                     </StackPanel>
 
                     <DataGrid Grid.Row="1"
                               ItemsSource="{Binding Ingredients}"
-                              AutoGenerateColumns="False">
+                              SelectedItem="{Binding SelectedIngredient}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
 
                         <DataGrid.Columns>
-
                             <DataGridTextColumn Header="Id"
                                                 Binding="{Binding Id}"/>
 
                             <DataGridTextColumn Header="Name"
                                                 Binding="{Binding Name}"/>
 
-                            <DataGridTextColumn Header="CL"
+                            <DataGridTextColumn Header="CL / adag"
                                                 Binding="{Binding Cl}"/>
 
-                            <DataGridTextColumn Header="Price"
+                            <DataGridTextColumn Header="Price / adag"
                                                 Binding="{Binding Price}"/>
-
                         </DataGrid.Columns>
-
                     </DataGrid>
 
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding Message}"
+                               Margin="0 10 0 0"
+                               FontWeight="Bold"/>
                 </Grid>
-
             </TabItem>
 
             <TabItem Header="Cocktails">
-
-                <Grid Margin="10">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Orientation="Horizontal"
-                                Margin="0 0 0 10">
-
-                        <TextBlock Text="Cocktail name:"
-                                   VerticalAlignment="Center"
-                                   Margin="0 0 5 0"/>
-
-                        <TextBox Width="180"
-                                 Margin="0 0 15 0"
-                                 Text="{Binding NewCocktailName}"/>
-
-                        <TextBlock Text="Glass:"
-                                   VerticalAlignment="Center"
-                                   Margin="0 0 5 0"/>
-
-                        <ComboBox Width="160"
-                                  Margin="0 0 15 0"
-                                  ItemsSource="{Binding Glasses}"
-                                  SelectedItem="{Binding SelectedGlass}"
-                                  DisplayMemberPath="Name"/>
-
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="1"
-                                Orientation="Horizontal"
-                                Margin="0 0 0 10">
-
-                        <TextBlock Text="Ingredient:"
-                                   VerticalAlignment="Center"
-                                   Margin="0 0 5 0"/>
-
-                        <ComboBox Width="180"
-                                  Margin="0 0 15 0"
-                                  ItemsSource="{Binding Ingredients}"
-                                  SelectedItem="{Binding SelectedIngredient}"
-                                  DisplayMemberPath="Name"/>
-
-                        <TextBlock Text="Amount:"
-                                   VerticalAlignment="Center"
-                                   Margin="0 0 5 0"/>
-
-                        <TextBox Width="80"
-                                 Margin="0 0 15 0"
-                                 Text="{Binding SelectedIngredientAmount}"/>
-
-                        <Button Content="Add to cocktail"
-                                Width="140"
-                                Click="AddIngredientToCocktailBtn_Click"/>
-
-                    </StackPanel>
-
-                    <Grid Grid.Row="2">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <DataGrid ItemsSource="{Binding CurrentCocktailIngredients}"
-                                  AutoGenerateColumns="False">
-
-                            <DataGrid.Columns>
-
-                                <DataGridTextColumn Header="Ingredient"
-                                                    Binding="{Binding Ingredient.Name}"/>
-
-                                <DataGridTextColumn Header="Amount"
-                                                    Binding="{Binding Amount}"/>
-
-                                <DataGridTextColumn Header="Total CL"
-                                                    Binding="{Binding TotalCl}"/>
-
-                                <DataGridTextColumn Header="Total Price"
-                                                    Binding="{Binding TotalPrice}"/>
-
-                            </DataGrid.Columns>
-
-                        </DataGrid>
-
-                        <StackPanel Grid.Column="1"
-                                    Margin="20 0 0 0">
-
-                            <TextBlock Text="Current cocktail"
-                                       FontSize="20"
-                                       FontWeight="Bold"
-                                       Margin="0 0 0 15"/>
-
-                            <TextBlock Text="{Binding CurrentCocktailCl, StringFormat=Total CL: {0}}"
-                                       FontSize="16"
-                                       Margin="0 0 0 10"/>
-
-                            <TextBlock Text="{Binding CurrentCocktailPrice, StringFormat=Price: {0} Ft}"
-                                       FontSize="16"
-                                       Margin="0 0 0 10"/>
-
-                            <TextBlock Text="{Binding CurrentCocktailStatus}"
-                                       FontSize="16"
-                                       FontWeight="Bold"/>
-
-                        </StackPanel>
-
-                    </Grid>
-
+                <Grid>
+                    <TextBlock Text="Cocktail CRUD next commit."
+                               FontSize="24"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
                 </Grid>
-
             </TabItem>
-
         </TabControl>
-
     </Grid>
-
 </Window>

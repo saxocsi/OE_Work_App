@@ -9,34 +9,69 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using global::OE_Work_App.Views;
 
 namespace OE_Work_App
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainViewModel MainViewModel { get; set; }
-
-        public MainWindow()
+        public partial class MainWindow : Window
         {
-            InitializeComponent();
+            public MainViewModel MainViewModel { get; set; }
 
-            MainViewModel = new MainViewModel();
+            public MainWindow()
+            {
+                InitializeComponent();
 
-            DataContext = MainViewModel;
-        }
+                MainViewModel = new MainViewModel();
 
-        private void AddIngredientBtn_Click(object sender, RoutedEventArgs e)
-        {
-            MainViewModel.AddIngredient();
-        }
+                DataContext = MainViewModel;
+            }
 
-        private void AddIngredientToCocktailBtn_Click(object sender, RoutedEventArgs e)
-        {
-            MainViewModel.AddIngredientToCocktail();
+            private void AddIngredientBtn_Click(object sender, RoutedEventArgs e)
+            {
+                IngredientEditorWindow window = new();
+
+                window.Owner = this;
+
+                if (window.ShowDialog() == true)
+                {
+                    MainViewModel.AddIngredient(
+                        window.Name,
+                        window.Cl,
+                        window.Price
+                    );
+                }
+            }
+
+            private void EditIngredientBtn_Click(object sender, RoutedEventArgs e)
+            {
+                if (MainViewModel.SelectedIngredient == null)
+                {
+                    MainViewModel.Message = "No ingredient selected.";
+
+                    return;
+                }
+
+                IngredientEditorWindow window = new(MainViewModel.SelectedIngredient);
+
+                window.Owner = this;
+
+                if (window.ShowDialog() == true)
+                {
+                    MainViewModel.EditIngredient(
+                        MainViewModel.SelectedIngredient,
+                        window.Name,
+                        window.Cl,
+                        window.Price
+                    );
+                }
+            }
+
+            private void DeleteIngredientBtn_Click(object sender, RoutedEventArgs e)
+            {
+                MainViewModel.DeleteSelectedIngredient();
+            }
         }
     }
-
-}

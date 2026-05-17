@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace OE_Work_App.ViewModels
 {
-    public class MainViewModel
+    public class MainViewModel : BaseViewModel
     {
         public IIngredientService IngredientService { get; set; }
 
@@ -20,55 +20,55 @@ namespace OE_Work_App.ViewModels
 
         public ObservableCollection<Ingredient> Ingredients { get; set; }
 
+        public ObservableCollection<Cocktail> Cocktails { get; set; }
+
         public ObservableCollection<Glass> Glasses { get; set; }
 
-        public ObservableCollection<CocktailIngredient> CurrentCocktailIngredients { get; set; }
+        private Ingredient? _selectedIngredient;
 
-        public string NewIngredientName { get; set; } = string.Empty;
-
-        public double NewIngredientCl { get; set; }
-
-        public int NewIngredientPrice { get; set; }
-
-        public string NewCocktailName { get; set; } = string.Empty;
-
-        public Glass? SelectedGlass { get; set; }
-
-        public Ingredient? SelectedIngredient { get; set; }
-
-        public int SelectedIngredientAmount { get; set; } = 1;
-
-        public double CurrentCocktailCl
+        public Ingredient? SelectedIngredient
         {
             get
             {
-                return CurrentCocktailIngredients.Sum(ingredient => ingredient.TotalCl);
+                return _selectedIngredient;
+            }
+            set
+            {
+                _selectedIngredient = value;
+
+                OnPropertyChanged();
             }
         }
 
-        public int CurrentCocktailPrice
+        private Cocktail? _selectedCocktail;
+
+        public Cocktail? SelectedCocktail
         {
             get
             {
-                return CurrentCocktailIngredients.Sum(ingredient => ingredient.TotalPrice);
+                return _selectedCocktail;
+            }
+            set
+            {
+                _selectedCocktail = value;
+
+                OnPropertyChanged();
             }
         }
 
-        public string CurrentCocktailStatus
+        private string _message = string.Empty;
+
+        public string Message
         {
             get
             {
-                if (SelectedGlass == null)
-                {
-                    return "No glass selected.";
-                }
+                return _message;
+            }
+            set
+            {
+                _message = value;
 
-                if (CurrentCocktailCl <= SelectedGlass.CapacityCl)
-                {
-                    return "Fits in glass.";
-                }
-
-                return "Does not fit in glass.";
+                OnPropertyChanged();
             }
         }
 
@@ -84,54 +84,68 @@ namespace OE_Work_App.ViewModels
                 IngredientService.Ingredients
             );
 
+            Cocktails = new ObservableCollection<Cocktail>(
+                CocktailService.Cocktails
+            );
+
             Glasses = new ObservableCollection<Glass>(
                 GlassService.Glass
             );
-
-            CurrentCocktailIngredients = new ObservableCollection<CocktailIngredient>();
-
-            SelectedGlass = Glasses.FirstOrDefault();
-
-            SelectedIngredient = Ingredients.FirstOrDefault();
         }
 
-        public void AddIngredient()
+        public void AddIngredient(string name, double cl, int price)
         {
-            Ingredient ingredient = new(
-                NewIngredientName,
-                NewIngredientCl,
-                NewIngredientPrice
-            );
+            Ingredient ingredient = new(name, cl, price);
 
             Ingredients.Add(ingredient);
 
             IngredientService.Ingredients.Add(ingredient);
 
-            NewIngredientName = string.Empty;
-
-            NewIngredientCl = 0;
-
-            NewIngredientPrice = 0;
+            Message = "Ingredient added.";
         }
 
-        public void AddIngredientToCocktail()
+        public void EditIngredient(Ingredient ingredient, string name, double cl, int price)
+        {
+            ingredient.Name = name;
+
+            ingredient.Cl = cl;
+
+            ingredient.Price = price;
+
+            OnPropertyChanged(nameof(Ingredients));
+
+            Message = "Ingredient edited.";
+        }
+
+        public void DeleteSelectedIngredient()
         {
             if (SelectedIngredient == null)
             {
+                Message = "No ingredient selected.";
+
                 return;
             }
 
-            if (SelectedIngredientAmount <= 0)
-            {
-                return;
-            }
-
-            CocktailIngredient cocktailIngredient = new(
-                SelectedIngredient,
-                SelectedIngredientAmount
+            bool isUsed = Cocktails.Any(cocktail =>
+                cocktail.Ingredients.Any(cocktailIngredient =>
+                    cocktailIngredient.Ingredient.Id == SelectedIngredient.Id
+                )
             );
 
-            CurrentCocktailIngredients.Add(cocktailIngredient);
+            if (isUsed)
+            {
+                Message = "This ingredient is used in a cocktail, so it cannot be deleted.";
+
+                return;
+            }
+
+            IngredientService.Ingredients.Remove(SelectedIngredient);
+
+            Ingredients.Remove(SelectedIngredient);
+
+            SelectedIngredient = null;
+
+            Message = "Ingredient deleted.";
         }
     }
 }
