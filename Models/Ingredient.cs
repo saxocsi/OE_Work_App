@@ -21,8 +21,11 @@ namespace OE_Work_App.Models
         public Ingredient(string name, double cl, int price)
         {
             Id = id++;
+
             Name = name;
+
             Cl = cl;
+
             Price = price;
         }
     }

@@ -10,16 +10,29 @@ namespace OE_Work_App.Models
     {
         public Ingredient Ingredient { get; set; }
 
-        public double Cl { get; set; }
+        public int Amount { get; set; }
 
-        public CocktailIngredient(
-            Ingredient ingredient,
-            double cl
-        )
+        public double TotalCl
+        {
+            get
+            {
+                return Ingredient.Cl * Amount;
+            }
+        }
+
+        public int TotalPrice
+        {
+            get
+            {
+                return Ingredient.Price * Amount;
+            }
+        }
+
+        public CocktailIngredient(Ingredient ingredient, int amount)
         {
             Ingredient = ingredient;
 
-            Cl = cl;
+            Amount = amount;
         }
     }
 }
