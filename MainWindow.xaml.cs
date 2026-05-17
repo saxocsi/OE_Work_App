@@ -1,22 +1,10 @@
-﻿using global::OE_Work_App.Views;
-using OE_Work_App.Models;
+﻿using OE_Work_App.Models;
 using OE_Work_App.ViewModels;
-using System.Text;
+using OE_Work_App.Views;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace OE_Work_App
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainViewModel MainViewModel { get; set; }
@@ -26,22 +14,20 @@ namespace OE_Work_App
             InitializeComponent();
 
             MainViewModel = new MainViewModel();
-
             DataContext = MainViewModel;
         }
 
         private void AddIngredientBtn_Click(object sender, RoutedEventArgs e)
         {
             IngredientEditorWindow window = new();
-
             window.Owner = this;
 
             if (window.ShowDialog() == true)
             {
                 MainViewModel.AddIngredient(
-                    window.Name,
-                    window.Cl,
-                    window.Price
+                    window.ViewModel.IngredientName,
+                    window.ViewModel.Cl,
+                    window.ViewModel.Price
                 );
             }
         }
@@ -50,22 +36,20 @@ namespace OE_Work_App
         {
             if (MainViewModel.SelectedIngredient == null)
             {
-                MainViewModel.Message = "No ingredient selected.";
-
+                MainViewModel.Message = "Nincs kiválasztott alapanyag.";
                 return;
             }
 
             IngredientEditorWindow window = new(MainViewModel.SelectedIngredient);
-
             window.Owner = this;
 
             if (window.ShowDialog() == true)
             {
                 MainViewModel.EditIngredient(
                     MainViewModel.SelectedIngredient,
-                    window.Name,
-                    window.Cl,
-                    window.Price
+                    window.ViewModel.IngredientName,
+                    window.ViewModel.Cl,
+                    window.ViewModel.Price
                 );
             }
         }
@@ -81,24 +65,16 @@ namespace OE_Work_App
                 MainViewModel.Ingredients,
                 MainViewModel.Glasses
             );
-
             window.Owner = this;
 
-            if (window.ShowDialog() == true)
+            if (window.ShowDialog() == true && window.ViewModel.SelectedGlass != null)
             {
-                if (window.SelectedGlass == null)
-                {
-                    return;
-                }
-
                 Cocktail cocktail = new(
-                    window.CocktailName,
-                    window.SelectedGlass
+                    window.ViewModel.CocktailName,
+                    window.ViewModel.SelectedGlass
                 );
 
-                cocktail.Ingredients = window
-                    .CocktailIngredients
-                    .ToList();
+                cocktail.Ingredients = window.ViewModel.CocktailIngredients.ToList();
 
                 MainViewModel.AddCocktail(cocktail);
             }
@@ -108,8 +84,7 @@ namespace OE_Work_App
         {
             if (MainViewModel.SelectedCocktail == null)
             {
-                MainViewModel.Message = "No cocktail selected.";
-
+                MainViewModel.Message = "Nincs kiválasztott koktél.";
                 return;
             }
 
@@ -118,28 +93,15 @@ namespace OE_Work_App
                 MainViewModel.Ingredients,
                 MainViewModel.Glasses
             );
-
             window.Owner = this;
 
-            if (window.ShowDialog() == true)
+            if (window.ShowDialog() == true && window.ViewModel.SelectedGlass != null)
             {
-                if (window.SelectedGlass == null)
-                {
-                    return;
-                }
-
-                Cocktail cocktail = new(
-                    window.CocktailName,
-                    window.SelectedGlass
-                );
-
-                cocktail.Ingredients = window
-                    .CocktailIngredients
-                    .ToList();
-
                 MainViewModel.EditCocktail(
                     MainViewModel.SelectedCocktail,
-                    cocktail
+                    window.ViewModel.CocktailName,
+                    window.ViewModel.SelectedGlass,
+                    window.ViewModel.CocktailIngredients.ToList()
                 );
             }
         }

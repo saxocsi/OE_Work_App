@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:OE_Work_App"
         mc:Ignorable="d"
-        Title="Cocktail Stock Manager" Height="600" Width="1000">
+        Title="Koktél készletkezelő"
+        Height="600"
+        Width="900">
     <Grid Margin="10">
         <TabControl>
-            <TabItem Header="Ingredients">
+            <TabItem Header="Alapanyagok">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -16,21 +17,10 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal"
-                                Margin="0 0 0 10">
-                        <Button Content="Add"
-                                Width="100"
-                                Margin="0 0 10 0"
-                                Click="AddIngredientBtn_Click"/>
-
-                        <Button Content="Edit"
-                                Width="100"
-                                Margin="0 0 10 0"
-                                Click="EditIngredientBtn_Click"/>
-
-                        <Button Content="Delete"
-                                Width="100"
-                                Click="DeleteIngredientBtn_Click"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Hozzáadás" Width="110" Margin="0,0,10,0" Click="AddIngredientBtn_Click"/>
+                        <Button Content="Szerkesztés" Width="110" Margin="0,0,10,0" Click="EditIngredientBtn_Click"/>
+                        <Button Content="Törlés" Width="110" Click="DeleteIngredientBtn_Click"/>
                     </StackPanel>
 
                     <DataGrid Grid.Row="1"
@@ -38,95 +28,52 @@
                               SelectedItem="{Binding SelectedIngredient}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True">
-
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id"
-                                                Binding="{Binding Id}"/>
-
-                            <DataGridTextColumn Header="Name"
-                                                Binding="{Binding Name}"/>
-
-                            <DataGridTextColumn Header="CL / adag"
-                                                Binding="{Binding Cl}"/>
-
-                            <DataGridTextColumn Header="Price / adag"
-                                                Binding="{Binding Price}"/>
+                            <DataGridTextColumn Header="Név" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Cl / adag" Binding="{Binding Cl}" Width="120"/>
+                            <DataGridTextColumn Header="Ár / adag (Ft)" Binding="{Binding Price}" Width="120"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <TextBlock Grid.Row="2"
                                Text="{Binding Message}"
-                               Margin="0 10 0 0"
+                               Margin="0,10,0,0"
                                FontWeight="Bold"/>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Cocktails">
-
+            <TabItem Header="Koktélok">
                 <Grid Margin="10">
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal"
-                    Margin="0 0 0 10">
-
-                        <Button Content="Add"
-                    Width="100"
-                    Margin="0 0 10 0"
-                    Click="AddCocktailBtn_Click"/>
-
-                        <Button Content="Edit"
-                    Width="100"
-                    Margin="0 0 10 0"
-                    Click="EditCocktailBtn_Click"/>
-
-                        <Button Content="Delete"
-                    Width="100"
-                    Click="DeleteCocktailBtn_Click"/>
-
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Hozzáadás" Width="110" Margin="0,0,10,0" Click="AddCocktailBtn_Click"/>
+                        <Button Content="Szerkesztés" Width="110" Margin="0,0,10,0" Click="EditCocktailBtn_Click"/>
+                        <Button Content="Törlés" Width="110" Click="DeleteCocktailBtn_Click"/>
                     </StackPanel>
 
                     <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Cocktails}"
-                  SelectedItem="{Binding SelectedCocktail}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True">
-
+                              ItemsSource="{Binding Cocktails}"
+                              SelectedItem="{Binding SelectedCocktail}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
                         <DataGrid.Columns>
-
-                            <DataGridTextColumn Header="Id"
-                                    Binding="{Binding Id}"/>
-
-                            <DataGridTextColumn Header="Name"
-                                    Binding="{Binding Name}"/>
-
-                            <DataGridTextColumn Header="Glass"
-                                    Binding="{Binding Glass.Name}"/>
-
-                            <DataGridTextColumn Header="Total CL"
-                                    Binding="{Binding TotalCl}"/>
-
-                            <DataGridTextColumn Header="Price"
-                                    Binding="{Binding Price}"/>
-
-                            <DataGridCheckBoxColumn Header="Fits"
-                                        Binding="{Binding FitsInGlass}"/>
-
+                            <DataGridTextColumn Header="Név" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Pohár" Binding="{Binding Glass.Name}" Width="150"/>
+                            <DataGridTextColumn Header="Összes cl" Binding="{Binding TotalCl}" Width="100"/>
+                            <DataGridTextColumn Header="Ár (Ft)" Binding="{Binding Price}" Width="100"/>
                         </DataGrid.Columns>
-
                     </DataGrid>
 
                     <TextBlock Grid.Row="2"
-                   Text="{Binding Message}"
-                   Margin="0 10 0 0"
-                   FontWeight="Bold"/>
-
+                               Text="{Binding Message}"
+                               Margin="0,10,0,0"
+                               FontWeight="Bold"/>
                 </Grid>
-
             </TabItem>
         </TabControl>
     </Grid>

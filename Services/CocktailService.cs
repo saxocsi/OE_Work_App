@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OE_Work_App.Models;
-using System.Collections.Generic;
+﻿using OE_Work_App.Models;
 
 namespace OE_Work_App.Services
 {
@@ -12,56 +6,39 @@ namespace OE_Work_App.Services
     {
         public List<Cocktail> Cocktails { get; set; }
 
-        public CocktailService()
+        public CocktailService(IIngredientService ingredientService, GlassService glassService)
         {
-            Glass smallGlass = new("0.3 liter", 30);
+            Glass mediumGlass = glassService.Glasses.First(g => g.CapacityCl == 50);
 
-            Glass mediumGlass = new("0.5 liter", 50);
+            Ingredient vodka = FindIngredient(ingredientService, "Vodka");
+            Ingredient gin = FindIngredient(ingredientService, "Gin");
+            Ingredient rum = FindIngredient(ingredientService, "Rum");
+            Ingredient tequila = FindIngredient(ingredientService, "Tequila");
+            Ingredient tripleSec = FindIngredient(ingredientService, "Triple sec");
+            Ingredient cola = FindIngredient(ingredientService, "Coca-Cola");
 
-            Ingredient vodka = new("Vodka", 4, 600);
+            Cocktail longIsland = new("Long Island", mediumGlass);
+            longIsland.Ingredients.Add(new CocktailIngredient(vodka, 1));
+            longIsland.Ingredients.Add(new CocktailIngredient(gin, 1));
+            longIsland.Ingredients.Add(new CocktailIngredient(rum, 1));
+            longIsland.Ingredients.Add(new CocktailIngredient(tequila, 1));
+            longIsland.Ingredients.Add(new CocktailIngredient(tripleSec, 1));
+            longIsland.Ingredients.Add(new CocktailIngredient(cola, 2));
 
-            Ingredient jager = new("Jagermeister", 4, 700);
+            Cocktail rumCola = new("Rum-Cola", mediumGlass);
+            rumCola.Ingredients.Add(new CocktailIngredient(rum, 2));
+            rumCola.Ingredients.Add(new CocktailIngredient(cola, 3));
 
-            Ingredient cola = new("Cola", 10, 250);
-
-            Ingredient orangeJuice = new("Orange Juice", 10, 300);
-
-            Cocktail vodkaCola = new("Vodka Cola", mediumGlass);
-
-            vodkaCola.Ingredients.Add(
-                new CocktailIngredient(vodka, 2)
-            );
-
-            vodkaCola.Ingredients.Add(
-                new CocktailIngredient(cola, 2)
-            );
-
-            Cocktail jagerOrange = new("Jager Orange", mediumGlass);
-
-            jagerOrange.Ingredients.Add(
-                new CocktailIngredient(jager, 2)
-            );
-
-            jagerOrange.Ingredients.Add(
-                new CocktailIngredient(orangeJuice, 2)
-            );
-
-            Cocktail strongShot = new("Strong Shot", smallGlass);
-
-            strongShot.Ingredients.Add(
-                new CocktailIngredient(vodka, 3)
-            );
-
-            strongShot.Ingredients.Add(
-                new CocktailIngredient(jager, 2)
-            );
-
-            Cocktails = new List<Cocktail>()
+            Cocktails = new List<Cocktail>
             {
-                vodkaCola,
-                jagerOrange,
-                strongShot
+                longIsland,
+                rumCola
             };
+        }
+
+        private static Ingredient FindIngredient(IIngredientService service, string name)
+        {
+            return service.Ingredients.First(i => i.Name == name);
         }
     }
 }

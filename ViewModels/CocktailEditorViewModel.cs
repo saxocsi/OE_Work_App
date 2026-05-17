@@ -1,79 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OE_Work_App.Models;
+﻿using OE_Work_App.Models;
+using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace OE_Work_App.ViewModels
 {
     public class CocktailEditorViewModel : BaseViewModel
     {
-        public ObservableCollection<Ingredient> Ingredients { get; set; }
+        private Ingredient? selectedIngredient;
+        private CocktailIngredient? selectedCocktailIngredient;
+        private Glass? selectedGlass;
+        private string cocktailName = string.Empty;
+        private int ingredientAmount = 1;
 
-        public ObservableCollection<Glass> Glasses { get; set; }
+        public ObservableCollection<Ingredient> Ingredients { get; }
 
-        public ObservableCollection<CocktailIngredient> CocktailIngredients { get; set; }
+        public ObservableCollection<Glass> Glasses { get; }
 
-        private Ingredient? _selectedIngredient;
+        public ObservableCollection<CocktailIngredient> CocktailIngredients { get; }
 
         public Ingredient? SelectedIngredient
         {
-            get { return _selectedIngredient; }
+            get { return selectedIngredient; }
             set
             {
-                _selectedIngredient = value;
+                selectedIngredient = value;
                 OnPropertyChanged();
             }
         }
-
-        private CocktailIngredient? _selectedCocktailIngredient;
 
         public CocktailIngredient? SelectedCocktailIngredient
         {
-            get { return _selectedCocktailIngredient; }
+            get { return selectedCocktailIngredient; }
             set
             {
-                _selectedCocktailIngredient = value;
+                selectedCocktailIngredient = value;
                 OnPropertyChanged();
             }
         }
-
-        private Glass? _selectedGlass;
 
         public Glass? SelectedGlass
         {
-            get { return _selectedGlass; }
+            get { return selectedGlass; }
             set
             {
-                _selectedGlass = value;
+                selectedGlass = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(FitMessage));
+                RefreshTotals();
             }
         }
-
-        private string _cocktailName = string.Empty;
 
         public string CocktailName
         {
-            get { return _cocktailName; }
+            get { return cocktailName; }
             set
             {
-                _cocktailName = value;
+                cocktailName = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CanSave));
             }
         }
 
-        private int _ingredientAmount = 1;
-
         public int IngredientAmount
         {
-            get { return _ingredientAmount; }
+            get { return ingredientAmount; }
             set
             {
-                _ingredientAmount = value;
+                ingredientAmount = value;
                 OnPropertyChanged();
             }
         }
@@ -88,32 +82,64 @@ namespace OE_Work_App.ViewModels
             get { return CocktailIngredients.Sum(ingredient => ingredient.TotalPrice); }
         }
 
+        public double RemainingCl
+        {
+            get
+            {
+                if (SelectedGlass == null)
+                {
+                    return 0;
+                }
+
+                return SelectedGlass.CapacityCl - TotalCl;
+            }
+        }
+
+        public bool FitsInGlass
+        {
+            get
+            {
+                return SelectedGlass != null && TotalCl <= SelectedGlass.CapacityCl;
+            }
+        }
+
+        public bool CanSave
+        {
+            get
+            {
+                return SelectedGlass != null
+                    && !string.IsNullOrWhiteSpace(CocktailName)
+                    && CocktailIngredients.Count > 0
+                    && FitsInGlass;
+            }
+        }
+
         public string FitMessage
         {
             get
             {
                 if (SelectedGlass == null)
                 {
-                    return "No glass selected.";
+                    return "Nincs pohár kiválasztva.";
                 }
 
-                if (TotalCl <= SelectedGlass.CapacityCl)
+                if (FitsInGlass)
                 {
-                    return "Fits in glass.";
+                    return $"Belefér a pohárba. (marad: {RemainingCl:0.#} cl)";
                 }
 
-                return "Does not fit in glass.";
+                return $"Nem fér bele! ({TotalCl:0.#} cl / {SelectedGlass.CapacityCl:0.#} cl)";
             }
         }
 
         public CocktailEditorViewModel(
             ObservableCollection<Ingredient> ingredients,
-            ObservableCollection<Glass> glasses
-        )
+            ObservableCollection<Glass> glasses)
         {
             Ingredients = ingredients;
             Glasses = glasses;
             CocktailIngredients = new ObservableCollection<CocktailIngredient>();
+            CocktailIngredients.CollectionChanged += CocktailIngredients_CollectionChanged;
 
             SelectedIngredient = Ingredients.FirstOrDefault();
             SelectedGlass = Glasses.FirstOrDefault();
@@ -122,37 +148,62 @@ namespace OE_Work_App.ViewModels
         public CocktailEditorViewModel(
             Cocktail cocktail,
             ObservableCollection<Ingredient> ingredients,
-            ObservableCollection<Glass> glasses
-        )
+            ObservableCollection<Glass> glasses)
         {
             Ingredients = ingredients;
             Glasses = glasses;
+            CocktailIngredients = new ObservableCollection<CocktailIngredient>();
+            CocktailIngredients.CollectionChanged += CocktailIngredients_CollectionChanged;
+
+            foreach (CocktailIngredient item in cocktail.Ingredients)
+            {
+                Ingredient? sharedIngredient = ingredients.FirstOrDefault(i => i.Id == item.Ingredient.Id);
+
+                if (sharedIngredient != null)
+                {
+                    CocktailIngredients.Add(new CocktailIngredient(sharedIngredient, item.Amount));
+                }
+            }
 
             CocktailName = cocktail.Name;
-            SelectedGlass = cocktail.Glass;
-
-            CocktailIngredients = new ObservableCollection<CocktailIngredient>(
-                cocktail.Ingredients
-            );
-
+            SelectedGlass = glasses.FirstOrDefault(g => g.CapacityCl == cocktail.Glass.CapacityCl)
+                ?? cocktail.Glass;
             SelectedIngredient = Ingredients.FirstOrDefault();
         }
 
-        public void AddIngredient()
+        public string? TryAddIngredient()
         {
-            if (SelectedIngredient == null || IngredientAmount <= 0)
+            if (SelectedIngredient == null)
             {
-                return;
+                return "Válassz alapanyagot.";
             }
 
-            CocktailIngredient cocktailIngredient = new(
-                SelectedIngredient,
-                IngredientAmount
-            );
+            if (IngredientAmount <= 0)
+            {
+                return "Az adag száma legyen nagyobb mint 0.";
+            }
 
-            CocktailIngredients.Add(cocktailIngredient);
+            if (SelectedGlass == null)
+            {
+                return "Válassz poharat.";
+            }
 
-            RefreshTotals();
+            double addedCl = SelectedIngredient.Cl * IngredientAmount;
+
+            if (TotalCl + addedCl > SelectedGlass.CapacityCl)
+            {
+                int maxAdag = GetMaxAmountThatFits(SelectedIngredient);
+
+                if (maxAdag <= 0)
+                {
+                    return "A pohár már tele van, nem fér bele több alapanyag.";
+                }
+
+                return $"Nem fér bele a pohárba! Maximum még {maxAdag} adag fér bele eből az alapanyagból.";
+            }
+
+            CocktailIngredients.Add(new CocktailIngredient(SelectedIngredient, IngredientAmount));
+            return null;
         }
 
         public void DeleteIngredient()
@@ -163,7 +214,27 @@ namespace OE_Work_App.ViewModels
             }
 
             CocktailIngredients.Remove(SelectedCocktailIngredient);
+        }
 
+        public int GetMaxAmountThatFits(Ingredient ingredient)
+        {
+            if (SelectedGlass == null || ingredient.Cl <= 0)
+            {
+                return 0;
+            }
+
+            double remaining = SelectedGlass.CapacityCl - TotalCl;
+
+            if (remaining <= 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Floor(remaining / ingredient.Cl);
+        }
+
+        private void CocktailIngredients_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
             RefreshTotals();
         }
 
@@ -171,6 +242,9 @@ namespace OE_Work_App.ViewModels
         {
             OnPropertyChanged(nameof(TotalCl));
             OnPropertyChanged(nameof(TotalPrice));
+            OnPropertyChanged(nameof(RemainingCl));
+            OnPropertyChanged(nameof(FitsInGlass));
+            OnPropertyChanged(nameof(CanSave));
             OnPropertyChanged(nameof(FitMessage));
         }
     }

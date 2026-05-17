@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OE_Work_App.Models;
 using OE_Work_App.Services;
-using OE_Work_App.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -15,6 +10,8 @@ namespace OE_Work_App.ViewModels
         private ObservableCollection<Ingredient> ingredients;
         private ObservableCollection<Cocktail> cocktails;
         private string message = string.Empty;
+        private Ingredient? selectedIngredient;
+        private Cocktail? selectedCocktail;
 
         public IIngredientService IngredientService { get; set; }
 
@@ -44,9 +41,25 @@ namespace OE_Work_App.ViewModels
 
         public ObservableCollection<Glass> Glasses { get; set; }
 
-        public Ingredient? SelectedIngredient { get; set; }
+        public Ingredient? SelectedIngredient
+        {
+            get { return selectedIngredient; }
+            set
+            {
+                selectedIngredient = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public Cocktail? SelectedCocktail { get; set; }
+        public Cocktail? SelectedCocktail
+        {
+            get { return selectedCocktail; }
+            set
+            {
+                selectedCocktail = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Message
         {
@@ -61,8 +74,8 @@ namespace OE_Work_App.ViewModels
         public MainViewModel()
         {
             IngredientService = new IngredientService();
-            CocktailService = new CocktailService();
             GlassService = new GlassService();
+            CocktailService = new CocktailService(IngredientService, GlassService);
 
             ingredients = new ObservableCollection<Ingredient>(IngredientService.Ingredients);
             cocktails = new ObservableCollection<Cocktail>(CocktailService.Cocktails);
@@ -76,7 +89,7 @@ namespace OE_Work_App.ViewModels
             IngredientService.Ingredients.Add(ingredient);
             Ingredients.Add(ingredient);
 
-            Message = "Ingredient added.";
+            Message = "Alapanyag hozzáadva.";
         }
 
         public void EditIngredient(Ingredient ingredient, string name, double cl, int price)
@@ -85,16 +98,16 @@ namespace OE_Work_App.ViewModels
             ingredient.Cl = cl;
             ingredient.Price = price;
 
-            Ingredients = new ObservableCollection<Ingredient>(IngredientService.Ingredients);
+            RefreshCocktailRows();
 
-            Message = "Ingredient edited.";
+            Message = "Alapanyag módosítva.";
         }
 
         public void DeleteSelectedIngredient()
         {
             if (SelectedIngredient == null)
             {
-                Message = "No ingredient selected.";
+                Message = "Nincs kiválasztott alapanyag.";
                 return;
             }
 
@@ -106,7 +119,7 @@ namespace OE_Work_App.ViewModels
 
             if (isUsed)
             {
-                Message = "This ingredient is used in a cocktail.";
+                Message = "Ez az alapanyag koktélban van használva, nem törölhető.";
                 return;
             }
 
@@ -115,33 +128,49 @@ namespace OE_Work_App.ViewModels
 
             SelectedIngredient = null;
 
-            Message = "Ingredient deleted.";
+            Message = "Alapanyag törölve.";
         }
 
         public void AddCocktail(Cocktail cocktail)
         {
+            if (!cocktail.FitsInGlass)
+            {
+                Message = "A koktél nem fér bele a pohárba, nem menthető.";
+                return;
+            }
+
             CocktailService.Cocktails.Add(cocktail);
             Cocktails.Add(cocktail);
 
-            Message = "Cocktail added.";
+            Message = "Koktél hozzáadva.";
         }
 
-        public void EditCocktail(Cocktail oldCocktail, Cocktail newCocktail)
+        public void EditCocktail(
+            Cocktail cocktail,
+            string name,
+            Glass glass,
+            List<CocktailIngredient> ingredients)
         {
-            oldCocktail.Name = newCocktail.Name;
-            oldCocktail.Glass = newCocktail.Glass;
-            oldCocktail.Ingredients = newCocktail.Ingredients;
+            double totalCl = ingredients.Sum(i => i.TotalCl);
 
-            Cocktails = new ObservableCollection<Cocktail>(CocktailService.Cocktails);
+            if (totalCl > glass.CapacityCl)
+            {
+                Message = "A koktél nem fér bele a pohárba, nem menthető.";
+                return;
+            }
 
-            Message = "Cocktail edited.";
+            cocktail.Name = name;
+            cocktail.Glass = glass;
+            cocktail.Ingredients = ingredients;
+
+            Message = "Koktél módosítva.";
         }
 
         public void DeleteSelectedCocktail()
         {
             if (SelectedCocktail == null)
             {
-                Message = "No cocktail selected.";
+                Message = "Nincs kiválasztott koktél.";
                 return;
             }
 
@@ -150,7 +179,15 @@ namespace OE_Work_App.ViewModels
 
             SelectedCocktail = null;
 
-            Message = "Cocktail deleted.";
+            Message = "Koktél törölve.";
+        }
+
+        private void RefreshCocktailRows()
+        {
+            foreach (Cocktail cocktail in Cocktails)
+            {
+                cocktail.Ingredients = cocktail.Ingredients.ToList();
+            }
         }
     }
 }

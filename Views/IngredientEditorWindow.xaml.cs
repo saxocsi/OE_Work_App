@@ -1,76 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OE_Work_App.Models;
-using System.Windows;
+﻿using OE_Work_App.Models;
 using OE_Work_App.Utils;
+using OE_Work_App.ViewModels;
+using System.Windows;
 
 namespace OE_Work_App.Views
 {
     public partial class IngredientEditorWindow : Window
     {
-        public string IngredientName { get; set; }
-
-        public double Cl { get; set; }
-
-        public int Price { get; set; }
+        public IngredientEditorViewModel ViewModel { get; }
 
         public IngredientEditorWindow()
         {
             InitializeComponent();
 
-            IngredientName = string.Empty;
-
-            DataContext = this;
+            ViewModel = new IngredientEditorViewModel();
+            DataContext = ViewModel;
         }
 
         public IngredientEditorWindow(Ingredient ingredient)
         {
             InitializeComponent();
 
-            IngredientName = ingredient.Name;
-
-            Cl = ingredient.Cl;
-
-            Price = ingredient.Price;
-
-            DataContext = this;
+            ViewModel = new IngredientEditorViewModel(ingredient);
+            DataContext = ViewModel;
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!InputValidator.IsValidText(IngredientName))
+            if (!InputValidator.IsValidText(ViewModel.IngredientName))
             {
-                MessageBox.Show("Ingredient name is required.");
-
+                MessageBox.Show("Az alapanyag neve kötelező.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!InputValidator.IsPositiveDouble(Cl))
+            if (!InputValidator.IsPositiveDouble(ViewModel.Cl))
             {
-                MessageBox.Show("CL must be greater than 0.");
-
+                MessageBox.Show("A cl érték legyen nagyobb mint 0.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!InputValidator.IsPositiveInt(Price))
+            if (!InputValidator.IsPositiveInt(ViewModel.Price))
             {
-                MessageBox.Show("Price must be greater than 0.");
-
+                MessageBox.Show("Az ár legyen nagyobb mint 0.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             DialogResult = true;
-
             Close();
         }
 
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
-
             Close();
         }
     }

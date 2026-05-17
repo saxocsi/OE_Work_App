@@ -1,194 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OE_Work_App.Models;
+﻿using OE_Work_App.Models;
+using OE_Work_App.Utils;
 using OE_Work_App.ViewModels;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
-using OE_Work_App.Utils;
 
 namespace OE_Work_App.Views
 {
     public partial class CocktailEditorWindow : Window
     {
-        public ObservableCollection<Ingredient> Ingredients { get; set; }
-
-        public ObservableCollection<Glass> Glasses { get; set; }
-
-        public ObservableCollection<CocktailIngredient> CocktailIngredients { get; set; }
-
-        public Ingredient? SelectedIngredient { get; set; }
-
-        public CocktailIngredient? SelectedCocktailIngredient { get; set; }
-
-        public Glass? SelectedGlass { get; set; }
-
-        public string CocktailName { get; set; }
-
-        public int IngredientAmount { get; set; }
-
-        public double TotalCl
-        {
-            get
-            {
-                return CocktailIngredients.Sum(ingredient => ingredient.TotalCl);
-            }
-        }
-
-        public int TotalPrice
-        {
-            get
-            {
-                return CocktailIngredients.Sum(ingredient => ingredient.TotalPrice);
-            }
-        }
-
-        public string FitMessage
-        {
-            get
-            {
-                if (SelectedGlass == null)
-                {
-                    return "No glass selected.";
-                }
-
-                if (TotalCl <= SelectedGlass.CapacityCl)
-                {
-                    return "Fits in glass.";
-                }
-
-                return "Does not fit in glass.";
-            }
-        }
+        public CocktailEditorViewModel ViewModel { get; }
 
         public CocktailEditorWindow(
             ObservableCollection<Ingredient> ingredients,
-            ObservableCollection<Glass> glasses
-        )
+            ObservableCollection<Glass> glasses)
         {
             InitializeComponent();
 
-            Ingredients = ingredients;
-            Glasses = glasses;
-
-            CocktailIngredients = new ObservableCollection<CocktailIngredient>();
-
-            CocktailName = string.Empty;
-
-            IngredientAmount = 1;
-
-            SelectedIngredient = Ingredients.FirstOrDefault();
-
-            SelectedGlass = Glasses.FirstOrDefault();
-
-            DataContext = this;
+            ViewModel = new CocktailEditorViewModel(ingredients, glasses);
+            DataContext = ViewModel;
         }
 
         public CocktailEditorWindow(
             Cocktail cocktail,
             ObservableCollection<Ingredient> ingredients,
-            ObservableCollection<Glass> glasses
-        )
+            ObservableCollection<Glass> glasses)
         {
             InitializeComponent();
 
-            Ingredients = ingredients;
-            Glasses = glasses;
-
-            CocktailName = cocktail.Name;
-
-            SelectedGlass = cocktail.Glass;
-
-            CocktailIngredients = new ObservableCollection<CocktailIngredient>(
-                cocktail.Ingredients
-            );
-
-            IngredientAmount = 1;
-
-            SelectedIngredient = Ingredients.FirstOrDefault();
-
-            DataContext = this;
+            ViewModel = new CocktailEditorViewModel(cocktail, ingredients, glasses);
+            DataContext = ViewModel;
         }
 
         private void AddIngredientBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedIngredient == null)
+            if (!InputValidator.IsPositiveInt(ViewModel.IngredientAmount))
             {
+                MessageBox.Show(
+                    "Az adag száma legyen nagyobb mint 0.",
+                    "Hiba",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
-            if (!InputValidator.IsPositiveInt(IngredientAmount))
+            string? error = ViewModel.TryAddIngredient();
+
+            if (error != null)
             {
-                MessageBox.Show("Amount must be greater than 0.");
-
-                return;
+                MessageBox.Show(error, "Pohár kapacitás", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-
-            CocktailIngredient cocktailIngredient = new(
-                SelectedIngredient,
-                IngredientAmount
-            );
-
-            CocktailIngredients.Add(cocktailIngredient);
-
-            RefreshUi();
         }
 
         private void DeleteIngredientBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedCocktailIngredient == null)
-            {
-                return;
-            }
-
-            CocktailIngredients.Remove(SelectedCocktailIngredient);
-
-            RefreshUi();
+            ViewModel.DeleteIngredient();
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!InputValidator.IsValidText(CocktailName))
+            if (!InputValidator.IsValidText(ViewModel.CocktailName))
             {
-                MessageBox.Show("Cocktail name is required.");
-
+                MessageBox.Show("A koktél neve kötelező.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (SelectedGlass == null)
+            if (ViewModel.SelectedGlass == null)
             {
-                MessageBox.Show("Glass is required.");
-
+                MessageBox.Show("Válassz poharat.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (CocktailIngredients.Count == 0)
+            if (ViewModel.CocktailIngredients.Count == 0)
             {
-                MessageBox.Show("Cocktail must contain at least one ingredient.");
+                MessageBox.Show("A koktélnak legalább egy alapanyag kell.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
+            if (!ViewModel.FitsInGlass)
+            {
+                MessageBox.Show(
+                    "A koktél nem fér bele a kiválasztott pohárba. Csökkentsd a mennyiséget vagy válassz nagyobb poharat.",
+                    "Pohár kapacitás",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
             DialogResult = true;
-
             Close();
         }
 
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
-
             Close();
-        }
-
-        private void RefreshUi()
-        {
-            DataContext = null;
-
-            DataContext = this;
         }
     }
 }
